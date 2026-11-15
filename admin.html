@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>PLATANIK — адмінка</title>
+<style>
+:root{--bg:#f2f2f2;--s:#fff;--ink:#000;--mut:#828a8d;--line:#e5e5e5;--y:#ffd004}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:500 14px/20px Inter,"Segoe UI",Arial,sans-serif}
+header{background:#000;color:#fff;padding:16px 24px;display:flex;gap:24px;align-items:center;flex-wrap:wrap}header b{font-size:18px;color:var(--y)}
+nav{display:flex;gap:4px;flex-wrap:wrap}nav button{background:none;border:0;color:#fff;padding:8px 14px;border-radius:100px;font:inherit;cursor:pointer}nav button[aria-pressed=true]{background:var(--y);color:#000}
+main{padding:24px;max-width:1500px;margin:auto}.card{background:var(--s);border-radius:16px;padding:20px;margin-bottom:16px;overflow:auto}
+table{border-collapse:collapse;width:100%;min-width:760px}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--mut);font-weight:500;font-size:12px}
+input,select,textarea{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}input[type=number]{width:80px}
+.btn{background:var(--y);border:0;border-radius:100px;padding:8px 16px;font:600 14px/20px inherit;cursor:pointer}.btn.g{background:#eee}
+.tag{display:inline-block;padding:2px 8px;border-radius:100px;font-size:12px;background:#eee}.tag.w{background:#fff3bf}.tag.ok{background:#e6f9ec;color:#00863a}.tag.b{background:#fae6e6;color:#c00}
+.mut{color:var(--mut)}small{color:var(--mut)}pre{white-space:pre-wrap;margin:0;font:inherit}#login{max-width:360px;margin:15vh auto}h2{margin:0 0 12px;font-size:18px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+</style></head><body>
+<header><b>PLATANIK · адмінка</b><nav id="nav" hidden></nav><span style="margin-left:auto" id="who"></span></header>
+<main id="app"></main>
+<script>
+const API = 'api/api.php', $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+async function req(a, body) { const r = await fetch(API + '?a=' + a, body === undefined ? { credentials: 'same-origin' } : { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'platanik' }, body: JSON.stringify(body) }); const j = await r.json().catch(() => null); if (!j || !j.ok) throw new Error((j && (j.message || j.error)) || 'Немає звʼязку із сервером'); return j; }
+const ROLES = { retail: 'Роздріб', opt_pending: 'Опт — чекає підтвердження', opt: 'Опт — підтверджено', blocked: 'Заблоковано' };
+const STAT = { new: 'Нове', confirmed: 'Підтверджено', shipped: 'Відправлено', done: 'Виконано', canceled: 'Скасовано' };
+const TYPES = { fiz: 'Фіз. особа', fop: 'ФОП', ur: 'Юр. особа' }, KIND = { oneclick: 'Купити в один клік', notify: 'Повідомити про надходження', callback: 'Передзвонити', question: 'Питання' };
+const dt = s => { try { return new Date(s).toLocaleString('uk-UA', { dateStyle: 'short', timeStyle: 'short' }); } catch (e) { return s; } };
+let D = null, tab = 'users';
+function loginView(msg) {
+  $('#nav').hidden = true; $('#who').textContent = '';
+  $('#app').innerHTML = `<form class="card" id="login"><h2>Вхід адміністратора</h2><p class="mut">Пароль задається в api/config.php (admin_password).</p><div class="row"><input type="password" id="pw" placeholder="Пароль" autocomplete="current-password" required><button class="btn">Увійти</button></div><p id="err" style="color:#c00">${esc(msg || '')}</p></form>`;
+  $('#login').addEventListener('submit', async e => { e.preventDefault(); try { await req('admin.login', { password: $('#pw').value }); load(); } catch (er) { $('#err').textContent = er.message; } });
+}
+async function load() { try { D = await req('admin.data'); } catch (e) { return loginView(/адміністратора/.test(e.message) ? '' : e.message); } render(); }
+function render() {
+  const pend = D.users.filter(u => u.role === 'opt_pending').length, newO = D.orders.filter(o => o.status === 'new').length, openL = D.leads.filter(l => !+l.done).length, newR = D.reviews.filter(r => r.status !== 'ok').length;
+  const tabs = [['users', `Клієнти${pend ? ' · ' + pend : ''}`], ['orders', `Замовлення${newO ? ' · ' + newO : ''}`], ['leads', `Заявки${openL ? ' · ' + openL : ''}`], ['reviews', `Відгуки${newR ? ' · ' + newR : ''}`], ['prices', 'Оптовий прайс']];
+  $('#nav').hidden = false; $('#nav').innerHTML = tabs.map(([k, l]) => `<button data-tab="${k}" aria-pressed="${k === tab}">${esc(l)}</button>`).join('') + '<button data-out>Вийти</button>';
+  $('#who').textContent = `Товарів у каталозі: ${D.catalogItems}`;
+  const app = $('#app');
+  if (tab === 'users') app.innerHTML = `<div class="card"><h2>Клієнти</h2><table><tr><th>Клієнт</th><th>Контакти</th><th>Тип</th><th>Статус</th><th>Знижка, %</th><th>Нотатка</th><th></th></tr>${D.users.map(u => `<tr data-u="${u.id}"><td><b>${esc(u.company || (u.first + ' ' + u.last))}</b><br><small>${esc(u.company ? u.first + ' ' + u.last : '')} ${u.edrpou ? '· код ' + esc(u.edrpou) : ''}</small><br><small>${dt(u.created)}</small></td><td>${esc(u.phone)}<br><small>${esc(u.email)}</small><br><small>${esc(u.addr || '')}</small></td><td>${TYPES[u.type] || ''}</td>
+    <td><select data-f="role">${Object.entries(ROLES).map(([k, l]) => `<option value="${k}"${k === u.role ? ' selected' : ''}>${l}</option>`).join('')}</select></td><td><input type="number" min="0" max="60" step="0.5" data-f="discount" value="${+u.discount}"></td><td><input data-f="note" value="${esc(u.note || '')}"></td><td><button class="btn" data-save-u>Зберегти</button></td></tr>`).join('') || '<tr><td colspan="7" class="mut">Ще немає зареєстрованих клієнтів</td></tr>'}</table>
+    <p class="mut">Оптову ціну бачить лише клієнт зі статусом «Опт — підтверджено». Ціна = оптовий прайс (вкладка «Оптовий прайс»), а якщо товару в прайсі немає — роздрібна мінус знижка клієнта.</p></div>`;
+  if (tab === 'orders') app.innerHTML = `<div class="card"><h2>Замовлення</h2><table><tr><th>№ / дата</th><th>Клієнт</th><th>Доставка та оплата</th><th>Товари</th><th>Сума</th><th>Статус</th></tr>${D.orders.map(o => { const p = o.payload || {}, c = p.contact || {}, d = p.delivery || {}; return `<tr data-o="${o.id}"><td><b>${esc(o.no)}</b>${p.opt ? ' <span class="tag w">ОПТ</span>' : ''}<br><small>${dt(o.created)}</small></td><td>${esc((c.first || '') + ' ' + (c.last || ''))}<br>${esc(c.phone || '')}<br><small>${esc(c.company || '')} ${esc(c.email || '')}</small></td><td>${esc([d.label, d.city, d.branch, d.addr].filter(Boolean).join(', '))}${d.rname ? `<br><small>Отримувач: ${esc(d.rname)} ${esc(d.rphone || '')}${d.cod ? ', НП ' + esc(d.cod) + ' грн' : ''}</small>` : ''}<br><small>${esc(p.payLabel || '')}</small>${p.comment ? `<br><small>💬 ${esc(p.comment)}</small>` : ''}</td><td>${(p.items || []).map(l => `${esc(l.cc || '')} · ${esc(l.n)} — ${l.q} шт × ${(+l.price).toFixed(2)} <small>[${esc(l.whName || '')}]</small>`).join('<br>')}</td><td><b>${(+o.total).toFixed(2)}</b><br><small>${o.qty} шт</small></td><td><select data-ost>${Object.entries(STAT).map(([k, l]) => `<option value="${k}"${k === o.status ? ' selected' : ''}>${l}</option>`).join('')}</select></td></tr>`; }).join('') || '<tr><td colspan="6" class="mut">Замовлень ще немає</td></tr>'}</table></div>`;
+  if (tab === 'leads') app.innerHTML = `<div class="card"><h2>Заявки</h2><table><tr><th>Дата</th><th>Тип</th><th>Клієнт</th><th>Товар / текст</th><th>Опрацьовано</th></tr>${D.leads.map(l => `<tr data-l="${l.id}"><td>${dt(l.created)}</td><td>${KIND[l.kind] || esc(l.kind)}</td><td>${esc(l.name)}<br><b>${esc(l.phone)}</b></td><td>${l.product_id ? 'ID товару: ' + esc(l.product_id) : ''} ${esc(l.text || '')}</td><td><input type="checkbox" data-ld ${+l.done ? 'checked' : ''}></td></tr>`).join('') || '<tr><td colspan="5" class="mut">Заявок ще немає</td></tr>'}</table></div>`;
+  if (tab === 'reviews') app.innerHTML = `<div class="card"><h2>Відгуки</h2><table><tr><th>Дата</th><th>Товар</th><th>Автор</th><th>Відгук</th><th></th></tr>${D.reviews.map(r => `<tr data-r="${r.id}"><td>${dt(r.created)}</td><td>ID ${esc(r.product_id)}</td><td>${esc(r.name)}<br>${'★'.repeat(+r.stars)}</td><td>${esc(r.text)}</td><td class="row">${r.status === 'ok' ? '<span class="tag ok">опубліковано</span>' : '<button class="btn" data-rv="ok">Опублікувати</button>'}<button class="btn g" data-rv="delete">Видалити</button></td></tr>`).join('') || '<tr><td colspan="5" class="mut">Відгуків ще немає</td></tr>'}</table></div>`;
+  if (tab === 'prices') app.innerHTML = `<div class="card"><h2>Оптовий прайс</h2><p>Зараз у прайсі позицій: <b>${D.optPrices}</b>. Завантажте CSV із 1С: у кожному рядку <b>артикул;ціна</b> (роздільник — крапка з комою або табуляція). Новий файл повністю замінює попередній прайс.</p>
+    <div class="row"><input type="file" id="pf" accept=".csv,.txt"><button class="btn" id="pup">Завантажити</button><button class="btn g" id="pclr">Очистити прайс</button></div><p id="pres" class="mut"></p>
+    <p class="mut">Файл опт-прайсу зберігається на сервері в закритій папці api/storage і ніколи не потрапляє в публічний каталог: оптову ціну сервер віддає тільки після входу підтвердженого оптового клієнта.</p></div>`;
+}
+document.addEventListener('click', async e => {
+  const t = e.target;
+  try {
+    if (t.dataset.tab) { tab = t.dataset.tab; render(); }
+    else if (t.hasAttribute('data-out')) { await req('admin.logout', {}); loginView(); }
+    else if (t.hasAttribute('data-save-u')) { const tr = t.closest('tr'), g = f => tr.querySelector(`[data-f=${f}]`).value; await req('admin.user', { id: +tr.dataset.u, role: g('role'), discount: +g('discount'), note: g('note') }); t.textContent = 'Збережено ✓'; setTimeout(load, 600); }
+    else if (t.dataset.rv) { await req('admin.review', { id: +t.closest('tr').dataset.r, status: t.dataset.rv }); load(); }
+    else if (t.id === 'pclr') { if (confirm('Очистити оптовий прайс?')) { await req('admin.optprices', { prices: {} }); load(); } }
+    else if (t.id === 'pup') { const f = $('#pf').files[0]; if (!f) return; const txt = await f.text(); const by = {}; txt.split(/\r?\n/).forEach(l => { const m = l.split(/[;\t]/); if (m.length >= 2) { const p = parseFloat(String(m[m.length - 1]).replace(/\s/g, '').replace(',', '.')); if (m[0].trim() && p > 0) by[m[0].trim()] = p; } }); const j = await req('admin.optprices', { byCode: by }); $('#pres').textContent = `Рядків у файлі: ${Object.keys(by).length}. Знайдено в каталозі та збережено: ${j.count}.`; D.optPrices = j.count; }
+  } catch (er) { alert(er.message); }
+});
+document.addEventListener('change', async e => {
+  const t = e.target;
+  try {
+    if (t.hasAttribute('data-ost')) await req('admin.order', { id: +t.closest('tr').dataset.o, status: t.value });
+    if (t.hasAttribute('data-ld')) await req('admin.lead', { id: +t.closest('tr').dataset.l, done: t.checked });
+  } catch (er) { alert(er.message); }
+});
+load();
+</script></body></html>
