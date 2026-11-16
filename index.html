@@ -1278,6 +1278,226 @@ main { display: block; min-height: 40vh; position: relative; }
 .p-main { justify-content: flex-start; align-self: flex-start; }
 .p-img { align-self: flex-start; }
 
+/* ===== 16 Nov: UX pass — cart, checkout, filters, mobile navigation ===== */
+:root { --r-card: 16px; --sh-hover: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.08); --ease: cubic-bezier(.2,.7,.2,1); }
+
+/* motion and hover feedback (calm, short) */
+.pc, .tile, .post, .cln, .opt, .chip, .btn, .ibtn, .bbtn, .catbtn { transition: box-shadow .2s var(--ease), transform .2s var(--ease), background-color .15s, border-color .15s, color .15s; }
+@media (hover: hover) { .pc:not(.f):hover, .post:hover { box-shadow: var(--sh-hover); transform: translateY(-2px); } }
+.ibtn:active, .btn:active, .bbtn:active { transform: scale(.97); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+/* header: wholesale entry point */
+.nav .b2b { display: inline-flex; align-items: center; gap: 8px; color: #fff; font: 500 14px/20px var(--f); white-space: nowrap; }
+.nav .b2b .ico { color: #ffd004; }
+.nav .b2b:hover { color: #ffd004; }
+@media (max-width: 1365px) { .nav .b2b span { display: none; } }
+
+/* sales funnel keeps focus: no "questions" block under cart and checkout */
+body[data-page="cart"] .ask-sec, body[data-page="checkout"] .ask-sec, body[data-page="order"] .ask-sec { display: none; }
+
+/* page title counter */
+.pt .cnt { font: 500 16px/24px var(--f); color: var(--muted); margin-left: 8px; vertical-align: middle; }
+.pt .pt-note { color: var(--muted); font: 400 14px/20px var(--f); }
+.pt .pt-note a { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- cart ---------- */
+.cart2, .co2 { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 32px; align-items: start; }
+.cl2 { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.note2 { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background: #fff8d6; color: #000; font: 400 14px/20px var(--f); }
+.note2 .ico { color: #b38f00; flex: none; }
+.note2 span { flex: 1; }
+.note2 button { color: var(--muted); }
+.cln { display: grid; grid-template-columns: 112px minmax(0, 1fr) auto 160px auto; gap: 24px; align-items: center; padding: 16px 24px 16px 16px; background: var(--surface); border-radius: var(--r-card); }
+.lph { width: 112px; height: 112px; display: grid; place-items: center; background: #fff; border-radius: 12px; overflow: hidden; }
+.lph img { width: 100%; height: 100%; object-fit: contain; }
+.li { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.lnm { font: 500 16px/24px var(--f); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.lnm:hover { color: var(--accent-text); }
+.lmeta { display: flex; flex-wrap: wrap; gap: 4px 16px; color: var(--muted); font: 400 13px/18px var(--f); }
+.lmeta b { color: var(--ink); font-weight: 500; }
+.lctl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 4px; }
+.whsel { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 100px; box-shadow: inset 0 0 0 1px var(--line); font: 500 13px/18px var(--f); cursor: pointer; }
+.whsel .ico { color: var(--muted); }
+.whsel select { appearance: none; -webkit-appearance: none; border: 0; background: none; padding-right: 16px; font: inherit; cursor: pointer; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4 6 4 4 4-4' fill='none' stroke='%23828a8d' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") right center / 14px no-repeat; }
+.whsel:hover { box-shadow: inset 0 0 0 1px #ffd004; }
+.sb { display: inline-flex; align-items: center; gap: 4px; font: 500 12px/16px var(--f); padding: 4px 8px; border-radius: 100px; }
+.sb.ok { color: #00863a; background: #e6f9ec; } .sb.no { color: #b35a00; background: #fff1e0; }
+.lq { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.lq small { color: var(--muted); font: 400 12px/16px var(--f); white-space: nowrap; }
+.lp { text-align: right; display: flex; flex-direction: column; gap: 2px; }
+.lp b { font: 600 20px/28px var(--f); white-space: nowrap; }
+.lp s { color: var(--muted); font: 500 13px/18px var(--f); }
+.la { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.la .heart { position: static; }
+.la .rm { color: var(--faint); padding: 4px; border-radius: 8px; }
+.la .rm:hover { color: #e30613; background: #fae6e6; }
+.back { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; margin-top: 8px; color: var(--muted); font: 500 14px/20px var(--f); }
+.back:hover { color: var(--ink); }
+
+/* summary column (cart + checkout) */
+.sum2 { position: sticky; top: 168px; display: flex; flex-direction: column; gap: 16px; }
+.sbox { background: var(--surface); border-radius: var(--r-card); padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+.sbox h2 { font: 600 20px/28px var(--f); }
+.sbox .sh { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.sbox .rows { display: flex; flex-direction: column; gap: 10px; }
+.sbox .rows > div { display: flex; justify-content: space-between; gap: 16px; font: 400 14px/20px var(--f); }
+.sbox .rows dt { color: var(--muted); }
+.sbox .rows dd { font-weight: 500; text-align: right; white-space: nowrap; }
+.sbox .rows .sv dd { color: #00863a; }
+.sbox .rows .sub { padding-left: 12px; font-size: 13px; }
+.sbox .tot { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 16px; border-top: 1px solid var(--line); }
+.sbox .tot span { font: 500 16px/24px var(--f); }
+.sbox .tot b { font: 700 28px/36px var(--f); white-space: nowrap; }
+.btn.big { display: flex; justify-content: center; align-items: center; width: 100%; min-height: 56px; border-radius: 100px; background: #ffd004; color: #000; font: 600 16px/24px var(--f); }
+.btn.big:hover { background: #ffdc3d; }
+.btn.big:disabled { opacity: .5; cursor: progress; }
+.hint { color: var(--muted); font: 400 13px/18px var(--f); }
+.hint a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.trust { display: flex; flex-direction: column; gap: 12px; padding: 4px 8px; }
+.trust li { display: flex; gap: 12px; align-items: center; font: 400 13px/18px var(--f); color: var(--muted); }
+.trust .ico { color: #b38f00; flex: none; }
+.mini { display: flex; flex-direction: column; gap: 12px; }
+.mi { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.mph { position: relative; width: 56px; height: 56px; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); display: grid; place-items: center; }
+.mph img { width: 48px; height: 48px; object-fit: contain; }
+.mph i { position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: #000; color: #fff; font: 600 11px/20px var(--f); text-align: center; font-style: normal; }
+.mn { font: 500 13px/18px var(--f); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mn small { display: block; color: var(--muted); font-weight: 400; }
+.mi b { font: 600 14px/20px var(--f); white-space: nowrap; }
+
+/* ---------- checkout ---------- */
+.steps { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.st { background: var(--surface); border-radius: var(--r-card); padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+.st h2 { display: flex; align-items: center; gap: 12px; font: 600 20px/28px var(--f); }
+.st h2 i { width: 32px; height: 32px; border-radius: 50%; background: #000; color: #ffd004; display: grid; place-items: center; font: 700 14px/1 var(--f); font-style: normal; flex: none; }
+.st h2 small { color: var(--muted); font: 400 14px/20px var(--f); }
+.g2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; }
+.st .fld label, #dvf .fld label { font: 500 13px/18px var(--f); color: var(--muted); }
+.st .fld input, .st .fld textarea { height: 52px; border-radius: 12px; border: 1px solid var(--line); padding: 0 16px; font: 500 16px/24px var(--f); background: var(--surface); width: 100%; }
+.st .fld textarea { height: auto; min-height: 96px; padding: 14px 16px; resize: vertical; }
+.st .fld input:focus, .st .fld textarea:focus { outline: none; border-color: #ffd004; box-shadow: 0 0 0 3px rgba(255, 208, 4, .3); }
+.st .fld.bad input { border-color: #e30613; background: #fff7f7; }
+.opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.opt { position: relative; display: flex; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--line); cursor: pointer; min-height: 72px; }
+.opt input { position: absolute; opacity: 0; pointer-events: none; }
+.opt:hover { box-shadow: inset 0 0 0 1px #ffd004; }
+.opt:has(input:checked) { box-shadow: inset 0 0 0 2px #ffd004; background: #fffbea; }
+.opt:has(input:focus-visible) { outline: 2px solid #000; outline-offset: 2px; }
+.opt .oi { width: 40px; height: 40px; border-radius: 10px; background: var(--bg); display: grid; place-items: center; flex: none; color: var(--ink); }
+.opt .oi.lg b { font: 800 12px/1 var(--f); color: #fff; }
+.opt .oi.np { background: #e30613; } .opt .oi.del { background: #1a73e8; } .opt .oi.sat { background: #0b5fa5; }
+.opt .ot { display: flex; flex-direction: column; min-width: 0; }
+.opt .ot b { font: 500 15px/20px var(--f); }
+.opt .ot small { color: var(--muted); font: 400 12px/16px var(--f); }
+.opt::after { content: ""; width: 20px; height: 20px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--faint); margin-left: auto; flex: none; }
+.opt:has(input:checked)::after { box-shadow: inset 0 0 0 6px #ffd004; background: #000; }
+.tplsel { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 12px; background: var(--bg); font: 500 14px/20px var(--f); }
+.tplsel select { margin-left: auto; border: 0; background: none; font: 600 14px/20px var(--f); }
+#dvf:empty { display: none; }
+.pick { display: flex; gap: 12px; align-items: flex-start; padding: 16px; border-radius: 12px; background: var(--bg); }
+.pick .ico { color: #b38f00; }
+.pick b { display: block; font: 500 15px/22px var(--f); }
+.pick small { color: var(--muted); font: 400 13px/18px var(--f); }
+
+/* ---------- listing: what's filtered ---------- */
+.achips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-height: 24px; }
+.achips .found { color: var(--muted); font: 400 14px/20px var(--f); margin-right: 8px; }
+.achips .found b { color: var(--ink); font-weight: 600; }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px 0 14px; border-radius: 100px; background: #000; color: #fff; font: 500 13px/18px var(--f); }
+.chip .ico { color: #ffd004; }
+.chip:hover { background: #262626; }
+
+/* ---------- toast ---------- */
+#toast .ta { margin-left: 16px; font: 600 14px/20px var(--f); color: #b38f00; text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- mobile: bottom navigation + sticky action bars ---------- */
+.tabbar, .mbar { display: none; }
+@media (max-width: 1100px) {
+  .cart2, .co2 { grid-template-columns: minmax(0, 1fr); }
+  .sum2 { position: static; }
+  .cln { grid-template-columns: 96px minmax(0, 1fr) auto; grid-template-areas: "ph info act" "ph q p"; gap: 12px 16px; }
+  .lph { grid-area: ph; width: 96px; height: 96px; align-self: start; } .li { grid-area: info; } .la { grid-area: act; flex-direction: row; align-self: start; }
+  .lq { grid-area: q; flex-direction: row; justify-self: start; } .lp { grid-area: p; }
+}
+@media (max-width: 767px) {
+  body { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+  .tabbar { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 55; background: rgba(255,255,255,.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 -1px 0 var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .tabbar a { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; height: 60px; color: var(--muted); font: 500 11px/14px var(--f); }
+  .tabbar a .ico { width: 24px; height: 24px; }
+  .tabbar a.on { color: #000; }
+  .tabbar a.on .ico { color: #000; }
+  .tabbar a.on::before { content: ""; position: absolute; top: 0; left: 30%; right: 30%; height: 3px; border-radius: 0 0 3px 3px; background: #ffd004; }
+  .tabbar .badge { position: absolute; top: 6px; left: calc(50% + 4px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: #ffd004; color: #000; font: 700 11px/18px var(--f); text-align: center; }
+  .tabbar .badge:empty { display: none; }
+  .totop { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+  .mbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; position: fixed; left: 0; right: 0; bottom: calc(60px + env(safe-area-inset-bottom, 0px)); z-index: 54; padding: 10px 16px; background: var(--surface); box-shadow: 0 -1px 0 var(--line), 0 -8px 24px rgba(0,0,0,.06); }
+  .mbar small { display: block; color: var(--muted); font: 400 12px/16px var(--f); }
+  .mbar b { font: 700 20px/26px var(--f); white-space: nowrap; }
+  .mbar .btn { min-height: 48px; padding: 0 22px; border-radius: 100px; display: inline-flex; align-items: center; gap: 8px; font: 600 15px/20px var(--f); }
+  body[data-page="cart"], body[data-page="checkout"], body[data-page="p"] { padding-bottom: calc(132px + env(safe-area-inset-bottom, 0px)); }
+  body[data-page="cart"] .totop, body[data-page="checkout"] .totop, body[data-page="p"] .totop { display: none; }
+  .sbox .btn.big { display: none; }
+  .cln { padding: 12px; } .lph { width: 80px; height: 80px; } .cln { grid-template-columns: 80px minmax(0, 1fr) auto; }
+  .lnm { font-size: 14px; line-height: 20px; } .lp b { font-size: 17px; }
+  .g2 { grid-template-columns: minmax(0, 1fr); }
+  .st { padding: 20px 16px; } .st h2 { font-size: 18px; }
+  .opts { grid-template-columns: minmax(0, 1fr); }
+  .sbox { padding: 20px 16px; }
+  .achips .found { flex-basis: 100%; }
+}
+
+/* gutters between the 1920 and 390 mock-ups */
+.wrap { max-width: 1664px; padding-inline: max(clamp(16px, 2.5vw, 32px), env(safe-area-inset-left, 0px)) max(clamp(16px, 2.5vw, 32px), env(safe-area-inset-right, 0px)); }
+@media (max-width: 767px) {
+  .nav .cartb, .nav .cartb + .sep { display: none !important; }
+  .subcats { flex-wrap: nowrap; overflow-x: auto; margin-inline: -16px; padding-inline: 16px; scrollbar-width: none; }
+  .subcats::-webkit-scrollbar { display: none; }
+  .subcats a { flex: none; }
+  .cln { position: relative; grid-template-columns: 80px minmax(0, 1fr); grid-template-areas: "ph info" "q p"; gap: 12px; }
+  .li { padding-right: 40px; }
+  .la { position: absolute; top: 8px; right: 8px; flex-direction: column; gap: 4px; }
+  .lq { flex-direction: row; gap: 8px; justify-self: start; align-self: center; }
+  .lq small { display: none; }
+  .lp { align-self: center; }
+  .lctl { gap: 6px; }
+  .sb { padding: 3px 8px; }
+}
+
+/* auth: form + wholesale benefits */
+.authw { display: grid; grid-template-columns: minmax(0, 520px) minmax(0, 460px); justify-content: center; gap: 32px; align-items: start; margin: 16px auto 56px; }
+.authw .auth { margin: 0; max-width: none; padding: 32px; border-radius: 16px; }
+.b2bp { background: #000; color: #fff; border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 20px; position: sticky; top: 168px; }
+.b2bp .eb { color: #ffd004; font: 600 12px/16px var(--f); letter-spacing: .1em; text-transform: uppercase; }
+.b2bp h2 { font: 600 24px/32px var(--f); }
+.b2bp ul { display: flex; flex-direction: column; gap: 14px; }
+.b2bp li { display: flex; gap: 12px; align-items: flex-start; font: 400 15px/22px var(--f); color: #e6e6e6; }
+.b2bp li .ico { color: #ffd004; flex: none; margin-top: 1px; }
+.b2bp p { color: #9aa0a3; font: 400 14px/20px var(--f); }
+.b2bp .tel { display: inline-flex; align-items: center; gap: 10px; font: 600 18px/24px var(--f); color: #fff; }
+.b2bp .tel .ico { color: #ffd004; }
+@media (max-width: 1023px) { .authw { grid-template-columns: minmax(0, 1fr); max-width: 560px; } .b2bp { position: static; } }
+@media (max-width: 767px) {
+  .authw .auth { padding: 20px 16px; } .b2bp { padding: 24px 20px; }
+  /* two products per row, like big marketplaces */
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .pc.f { padding: 10px; gap: 8px; border-radius: 12px; }
+  .pc.f .fields, .pc.f .wh.mobwh { display: none; }
+  .pc.f .nm { font: 500 13px/18px var(--f); min-height: 54px; }
+  .pc.f .price b { font: 600 15px/20px var(--f); }
+  .pc.f .price .old, .pc.f .price s, .pc.f .price .rrp { font-size: 12px; }
+  .pc.f .ibtn { width: 40px; height: 40px; border-radius: 8px; }
+  .pc.f .ibtn .ico { width: 20px; height: 20px; }
+  .pc.f .heart { top: 8px; right: 8px; }
+  .pc.f .tag { left: 8px; top: 8px; }
+  .pc.f .lb-opt, .pc.f .lb-rrc { font-size: 10px; padding: 2px 6px; }
+}
+.authw .auth .fld { min-width: 0; }
+.authw .auth .fld input, .authw .auth .fld select, .authw .auth .fld textarea { width: 100%; max-width: 100%; box-sizing: border-box; }
+.pc .nm { overflow-wrap: break-word; white-space: normal; text-overflow: clip; }
+.authw .auth { grid-template-columns: minmax(0, 1fr); }
+.pc .nm, .pc.f .nm { display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><symbol id="logo-sym" viewBox="0 0 3769 544">
 <mask id="pl-logo-mask" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="3769" height="544">
@@ -1436,7 +1656,8 @@ const IP = {
   heartf: '<path d="M12 20.5 4.2 12.9a5 5 0 0 1 7.1-7.1l.7.7.7-.7a5 5 0 0 1 7.1 7.1Z" fill="currentColor"/>',
   play: '<path d="M7 4.5v15l12-7.500Z" fill="currentColor"/>',
 };
-const ic = (n, cls = '') => IP[n] ? `<svg class="ico ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IP[n]}</svg>` : `<svg class="ico ${cls}" aria-hidden="true"><use href="#i-${n}"></use></svg>`;
+const IA = { telegram: 'tg', building: 'bank', chd: 'chr' };
+const ic = (n, cls = '') => n === 'chd' ? ic('chr', cls + ' d') : IA[n] ? ic(IA[n], cls) : IP[n] ? `<svg class="ico ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IP[n]}</svg>` : `<svg class="ico ${cls}" aria-hidden="true"><use href="#i-${n}"></use></svg>`;
 const R = (ua, ru) => S.lang === 'ru' ? ru : ua;
 const CAT_ICON = { akciya: 'cAk', 'aksessuary-dlia-cabini': 'cAcc', 'dorozhnaya-kukhnya': 'cKit', 'avtohimiya-ta-doglyad': 'cChem', svetotekhnika: 'cLight', bryzgoviki: 'cMud', 'kuzov-kabina': 'cBody', 'malyy-kommercheskiy-transport': 'cVan', 'markirovochnye-znaki-svetootrazhateli': 'cTape', 'pnevmo-tormoznye-soedineniya': 'cPneu', zapchasti: 'cParts', instrumenty: 'cTool', 'furnitura-furgonov-i-pricepov': 'cTrailer', 'sistema-otopleniya': 'cHeat', takelazh: 'cStrap' };
 
@@ -1578,9 +1799,10 @@ function refreshBuyButtons(id) {
 }
 
 /* ===== small UI ===== */
-function toast(msg, extra = '') {
-  const el = $('#toast'); el.innerHTML = `<span>${esc(msg)}</span>${extra}`; el.classList.add('on');
-  clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('on'), 2800);
+function toast(msg, extra = '', fn) {
+  const el = $('#toast'); el.innerHTML = `<span>${esc(msg)}</span>${fn ? `<button type="button" class="ta">${esc(extra)}</button>` : extra}`; el.classList.add('on');
+  if (fn) $('.ta', el).addEventListener('click', () => { el.classList.remove('on'); fn(); });
+  clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('on'), fn ? 6000 : 2800);
 }
 async function copyText(text, msg) {
   try { await navigator.clipboard.writeText(text); toast(msg || t('copied')); return true; }
@@ -1732,6 +1954,7 @@ function renderChrome() {
       <a class="soc" href="viber://chat?number=%2B${CONFIG.viber.replace(/\D/g, '')}" aria-label="Viber">${ic('viber')}</a>
       <a class="soc" href="https://t.me/${CONFIG.telegram}" target="_blank" rel="noopener" aria-label="Telegram">${ic('tg')}</a></div></div>
     <div class="nav-r">
+      ${ws ? '' : `<a class="b2b dsk" href="${u ? '#account' : '#register'}">${ic('coins', 's20')}<span>${R('Оптовим клієнтам', 'Оптовым клиентам')}</span></a><i class="sep dsk">|</i>`}
       <span class="lang dsk" role="group" aria-label="Мова / Язык"><button type="button" data-lang="ru" class="${S.lang === 'ru' ? 'on' : ''}" aria-pressed="${S.lang === 'ru'}">RU</button><button type="button" data-lang="ua" class="${S.lang === 'ua' ? 'on' : ''}" aria-pressed="${S.lang === 'ua'}">UA</button></span><i class="sep dsk">|</i>
       ${ws ? `<a class="nbtn dsk" href="#account-invoices" aria-label="${t('invoices')}" title="${t('invoices')}">${ic('file')}</a><i class="sep dsk">|</i>` : ''}
       <button class="nbtn dsk" type="button" id="userbtn" aria-haspopup="true" aria-expanded="false" aria-label="${t('cabinet')}">${ic('user')}${u ? `<span>${esc(ws ? t('optProfile') : (u.first || t('profile')))}</span>` : ''}</button><i class="sep dsk">|</i>
@@ -1765,6 +1988,9 @@ function renderChrome() {
     </div></div>
     <span class="copy mob">Copyright ${new Date().getFullYear()} . PLATANIK</span>
   </div></footer>`;
+  let tb = $('#tabbar'); if (!tb) { tb = document.createElement('nav'); tb.id = 'tabbar'; tb.className = 'tabbar'; tb.setAttribute('aria-label', R('Швидка навігація', 'Быстрая навигация')); document.body.appendChild(tb); }
+  tb.innerHTML = [['home', '#home', 'home', t('home')], ['catalog', '#catalog', 'grid', t('catalogShort')], ['search', '#search', 'search', R('Пошук', 'Поиск'), 'data-focus-search'], ['favorites', '#favorites', 'heart', R('Обране', 'Избранное'), '', 'fav'], ['cart', '#cart', 'cart', t('cart'), '', 'cart']]
+    .map(([k, h, i, l, x = '', b = '']) => `<a href="${h}" data-tab="${k}" ${x}>${ic(i)}${b ? `<span class="badge" data-badge="${b}"></span>` : ''}<span>${l}</span></a>`).join('');
   const q = $('#q'), mq = matchMedia('(max-width: 767px)'); const ph = () => { q.placeholder = mq.matches ? q.dataset.phm : q.dataset.ph; }; ph(); mq.addEventListener('change', ph);
   updateBadges();
 }
@@ -2010,6 +2236,7 @@ function viewListing(o) {
       </div></div>
     ${subs.length ? `<div class="subcats">${subs.map(c => `<a href="#c${c.id}">${esc(cn(c))} <small>${fmtN(catItems(c).length)}</small></a>`).join('')}</div>` : ''}
     ${o.intro || ''}
+    <div class="achips" id="achips"></div>
     <div class="lst"><aside class="filters" id="filters" aria-label="${t('filters')}"></aside><section class="res" aria-label="${t('goods')}"><div id="res"></div><div id="pages"></div></section></div>
     </div></div></section>`;
   $('#per').addEventListener('change', e => { L.per = +e.target.value; L.page = 1; updList(items, o); });
@@ -2061,6 +2288,15 @@ function updList(items, o) {
     else if (g === 'av') f.av = inp.checked ? inp.value : '';
     L.page = 1; updList(items, o);
   }));
+  const chips = [];
+  if (f.pmin != null || f.pmax != null) chips.push(['p', '', `${t('price')}: ${f.pmin ?? lo} – ${f.pmax ?? hi} грн`]);
+  f.mk.forEach(m => chips.push(['mk', m, m])); f.wh.forEach(i => chips.push(['wh', i, whName(i)]));
+  if (f.av) chips.push(['av', f.av, f.av === 'in' ? t('avIn') : t('avOut')]);
+  const ac = $('#achips');
+  if (ac) {
+    ac.innerHTML = `<span class="found">${R('Знайдено', 'Найдено')} <b>${fmtN(res.length)}</b> ${plural(res.length)}</span>${chips.map(([g, v, l]) => `<button type="button" class="chip" data-chip="${g}" data-v="${esc(String(v))}">${esc(l)}${ic('x', 's16')}</button>`).join('')}${chips.length > 1 ? `<button type="button" class="dash" data-chip="all">${t('clearAll')}</button>` : ''}`;
+    $$('[data-chip]', ac).forEach(b => b.addEventListener('click', () => { const g = b.dataset.chip, v = b.dataset.v; if (g === 'all') L.f = blankF(); else if (g === 'p') { f.pmin = f.pmax = null; } else if (g === 'mk') f.mk.delete(v); else if (g === 'wh') f.wh.delete(+v); else if (g === 'av') f.av = ''; L.page = 1; updList(items, o); }));
+  }
   const pages = Math.max(1, Math.ceil(res.length / L.per)); if (L.page > pages) L.page = pages;
   const slice = res.slice((L.page - 1) * L.per, L.page * L.per);
   const box = $('#res');
@@ -2142,6 +2378,7 @@ function viewProduct(id) {
       <div role="tabpanel" id="tp-vid" hidden>${vid}</div>
       <div role="tabpanel" id="tp-rev" hidden><div class="rev" id="revs"></div></div>
     </div>${sideBanner('p-ban')}</div>
+    <div class="mbar pbar"><div><small>${it._av ? t('inStock') : t('noStock')}</small><b class="num">${moneyTxt(pr)}</b></div>${it._av ? `<button class="btn" type="button" data-add="${id}" data-big="1">${ic('cart')}<span>${inC ? t('inCart') : t('toCart')}</span></button>` : `<button class="btn" type="button" data-ask="${id}">${t('notifyMe')}</button>`}</div>
   </div></section>
   ${viewed.length ? `<section class="sec"><div class="wrap"><div class="blk"><div class="blk-h"><h2>${t('mostViewed')}</h2>${pagerCtl('rowViewed')}</div><div class="row" id="rowViewed">${viewed.map(x => card(x)).join('')}</div></div></div></section>` : ''}
   ${sim.length ? `<section class="sec"><div class="wrap"><div class="blk"><div class="blk-h"><h2>${t('similar')}</h2>${pagerCtl('rowSim')}</div><div class="row" id="rowSim">${sim.map(x => card(x)).join('')}</div></div></div></section>` : ''}`;
@@ -2181,89 +2418,121 @@ function bindCartControls(root, rerender) {
   $$('[data-lrm]', root).forEach(b => b.addEventListener('click', () => { const l = S.cart.splice(+b.dataset.lrm, 1)[0]; saveAll(); updateBadges(); if (l) refreshBuyButtons(l.id); rerender(); }));
   $$('input[id^="mq"], input[id^="cq"]', root).forEach(inp => inp.addEventListener('change', () => { const k = +inp.id.slice(2); const l = S.cart[k]; if (!l) return; const it = S.byId.get(l.id); l.q = Math.max(it && it.mo || 1, parseInt(inp.value, 10) || 1); saveAll(); updateBadges(); rerender(); }));
 }
+/* trust points shown next to every order total */
+const trustList = () => `<ul class="trust"><li>${ic('truck', 's20')}<span>${R('Відвантаження в день замовлення, якщо оформити до 16:30', 'Отгрузка в день заказа, если оформить до 16:30')}</span></li><li>${ic('shield', 's20')}<span>${R('Гарантія виробника на весь товар', 'Гарантия производителя на весь товар')}</span></li><li>${ic('refresh', 's20')}<span>${R(`Повернення протягом ${CONFIG.returnDays} днів`, `Возврат в течение ${CONFIG.returnDays} дней`)}</span></li></ul>`;
+const stockBadge = (it, wh) => { const st = it._st[wh] || {}; return st.n > 0 ? `<span class="sb ok">${ic('check', 's14')}${R('Є на складі', 'Есть на складе')} ${esc(whName(wh))}</span>` : `<span class="sb no">${R('Під замовлення', 'Под заказ')} · ${esc(whName(wh))}</span>`; };
 function viewCart() {
   setTitle(t('cart'));
   const lines = cartLines();
   const byWh = {}; lines.forEach(l => { (byWh[l.wh] = byWh[l.wh] || { n: 0, s: 0 }); byWh[l.wh].n += l.q; byWh[l.wh].s += priceOf(l.it) * l.q; });
-  const multi = Object.keys(byWh).length > 1;
-  $('#view').innerHTML = `<div class="wrap">${crumbs([['', t('cart')]])}
-    ${multi && S.note ? `<div class="note"><span>${t('whNote')}</span><button type="button" id="noteX" aria-label="${t('close')}">${ic('x', 's')}</button></div>` : ''}
-    ${lines.length ? `<div class="cart-l"><div class="card cl">
-      <div class="ch"><h2>${t('cart')} <small>(${cartQty()} ${plural(cartQty())})</small></h2><button class="btn line sm" type="button" id="clr">${ic('trash', 'xs')} ${t('clearCart')}</button></div>
-      <div class="th"><span></span><span>${t('thName')}</span><span>${t('thMaker')}</span><span>${t('warehouse')}</span><span>${t('qty')}</span><span>${t('price')}</span><span></span></div>
-      ${lines.map((l, k) => `<div class="tr"><a class="tph" href="#p${l.id}">${pimg(l.it)}</a><a class="c-n" href="#p${l.id}">${esc(nm(l.it))}</a><div class="c-b">${esc(l.it.b || '—')}<small>${esc(l.it.cc || '')}</small></div>
-        <div class="c-w"><select data-lwh="${k}" aria-label="${t('warehouse')}">${whOptions(l.it, l.wh)}</select></div><div class="c-q">${qtyBox('cq' + k, l.q, 'sm')}<span class="lp">${moneyTxt(priceOf(l.it) * l.q)}</span></div><div class="c-p"><b>${moneyTxt(priceOf(l.it) * l.q)}</b></div><button class="rm" type="button" data-lrm="${k}" aria-label="${t('del')}">${ic('trash', 's')}</button></div>`).join('')}
-      <div class="cf"><span>${t('sumGoods')}</span><b>${moneyTxt(cartSum())}</b><a class="btn" href="#checkout">${t('toCheckout')}</a></div></div>
-      <aside class="card csum"><h3>${cartQty()} ${plural(cartQty())} ${t('inCartN')}</h3>${Object.entries(byWh).map(([w, v]) => `<div class="w"><small>${v.n} ${plural(v.n)} ${t('onWh')} — ${esc(whName(+w))}</small><b>${moneyTxt(v.s)}</b></div>`).join('')}<div class="tot"><small class="muted">${t('total')}</small><br><b class="num">${moneyTxt(cartSum())}</b></div><a class="btn" href="#checkout">${t('toCheckout')}</a></aside></div>`
+  const multi = Object.keys(byWh).length > 1, opt = optOn();
+  const retail = lines.reduce((a, l) => a + l.it.p * l.q, 0), save = opt ? retail - cartSum() : 0;
+  $('#view').innerHTML = `<section class="pg-sec"><div class="wrap">${crumbs([['', t('cart')]])}
+    <div class="pt"><h1>${t('cart')}${lines.length ? ` <span class="cnt">${cartQty()} ${plural(cartQty())}</span>` : ''}</h1>${lines.length ? `<button class="dash" type="button" id="clr">${ic('trash', 's16')}${t('clearCart')}</button>` : ''}</div>
+    ${lines.length ? `<div class="cart2"><div class="cl2">
+      ${multi && S.note ? `<div class="note2">${ic('info', 's20')}<span>${t('whNote')}</span><button type="button" id="noteX" aria-label="${t('close')}">${ic('x', 's20')}</button></div>` : ''}
+      ${lines.map((l, k) => `<article class="cln">
+        <a class="lph" href="#p${l.id}">${pimg(l.it)}</a>
+        <div class="li"><a class="lnm" href="#p${l.id}">${esc(nm(l.it))}</a>
+          <div class="lmeta"><span>${esc(l.it.b || '—')}</span><span>${t('article')}: <b>${esc(l.it.cc || '—')}</b></span></div>
+          <div class="lctl"><label class="whsel">${ic('pin', 's16')}<select data-lwh="${k}" aria-label="${t('warehouse')}">${whOptions(l.it, l.wh)}</select></label>${stockBadge(l.it, l.wh)}</div></div>
+        <div class="lq">${qtyBox('cq' + k, l.q, 'sm', l.it.mo || 1)}<small>${moneyTxt(priceOf(l.it))} / ${t('pcs')}</small></div>
+        <div class="lp"><b class="num">${moneyTxt(priceOf(l.it) * l.q)}</b>${opt && l.it.p > priceOf(l.it) ? `<s>${moneyTxt(l.it.p * l.q)}</s>` : ''}</div>
+        <div class="la">${favBtn(l.it)}<button class="rm" type="button" data-lrm="${k}" aria-label="${t('del')}" title="${t('del')}">${ic('trash', 's20')}</button></div>
+      </article>`).join('')}
+      <a class="back" href="#catalog">${ic('chr', 's16 l')}${t('continue')}</a>
+    </div>
+    <aside class="sum2"><div class="sbox">
+      <h2>${R('Разом', 'Итого')}</h2>
+      <dl class="rows"><div><dt>${cartQty()} ${plural(cartQty())} ${R('на суму', 'на сумму')}</dt><dd>${moneyTxt(opt ? retail : cartSum())}</dd></div>
+        ${save > 0.004 ? `<div class="sv"><dt>${R('Ваша оптова знижка', 'Ваша оптовая скидка')}</dt><dd>−${moneyTxt(save)}</dd></div>` : ''}
+        ${multi ? Object.entries(byWh).map(([w, v]) => `<div class="sub"><dt>${R('зі складу', 'со склада')} ${esc(whName(+w))} · ${v.n} ${t('pcs')}</dt><dd>${moneyTxt(v.s)}</dd></div>`).join('') : ''}
+        <div><dt>${R('Доставка', 'Доставка')}</dt><dd class="muted">${R('за тарифами перевізника', 'по тарифам перевозчика')}</dd></div></dl>
+      <div class="tot"><span>${R('До сплати', 'К оплате')}</span><b class="num">${moneyTxt(cartSum())}</b></div>
+      <a class="btn big" href="#checkout">${t('toCheckout')}</a>
+      ${!S.user ? `<p class="hint">${R('Оптовий клієнт?', 'Оптовый клиент?')} <a href="#login">${R('Увійдіть', 'Войдите')}</a>, ${R('щоб побачити свої ціни', 'чтобы увидеть свои цены')}</p>` : ''}
+    </div>${trustList()}</aside></div>
+    <div class="mbar"><div><small>${R('До сплати', 'К оплате')}</small><b class="num">${moneyTxt(cartSum())}</b></div><a class="btn" href="#checkout">${t('toCheckout')}</a></div>`
     : `<div class="empty"><span class="ei">${ic('cart')}</span><b>${t('cartEmpty')}</b><p>${t('cartEmptyS')}</p><a class="btn" href="#catalog">${t('toCatalog')}</a></div>`}
-  </div>`;
+  </div></section>`;
   const nx = $('#noteX'); if (nx) nx.addEventListener('click', () => { S.note = false; nx.parentElement.remove(); });
-  const cl = $('#clr'); if (cl) cl.addEventListener('click', () => { const ids = S.cart.map(l => l.id); S.cart = []; saveAll(); updateBadges(); ids.forEach(refreshBuyButtons); viewCart(); });
+  const cl = $('#clr'); if (cl) cl.addEventListener('click', () => { const ids = S.cart.map(l => l.id); const old = S.cart.slice(); S.cart = []; saveAll(); updateBadges(); ids.forEach(refreshBuyButtons); viewCart(); toast(R('Кошик очищено', 'Корзина очищена'), R('Повернути', 'Вернуть'), () => { S.cart = old; saveAll(); updateBadges(); viewCart(); }); });
   bindCartControls($('#view'), viewCart);
 }
 
 /* ===== checkout ===== */
 const DELIV = ['np', 'npc', 'del', 'sat', 'pk', 'ph', 'drop'];
 const delivLabel = k => t({ np: 'dvNP', npc: 'dvNPC', del: 'dvDel', sat: 'dvSat', pk: 'dvPK', ph: 'dvPH', drop: 'dvDrop' }[k]);
+const DV_META = { np: ['package', 'np', 'НП'], npc: ['home', 'np', 'НП'], del: ['truck', 'del', 'D'], sat: ['truck', 'sat', 'S'], pk: ['pin', 'pk', ''], ph: ['pin', 'pk', ''], drop: ['swap', 'np', 'НП'] };
+const dvNote = k => k === 'pk' || k === 'ph' ? R('безкоштовно', 'бесплатно') : k === 'drop' ? R('від імені вашого магазину', 'от имени вашего магазина') : R('за тарифами перевізника', 'по тарифам перевозчика');
 function viewCheckout() {
   setTitle(t('checkout'));
   const lines = cartLines();
   if (!lines.length) { location.hash = 'cart'; return; }
   const d = store.get('draft', {}) || {}, u = S.user || {};
   const val = k => esc(d[k] ?? (k === 'first' ? u.first : k === 'last' ? u.last : k === 'phone' ? u.phone : k === 'email' ? u.email : '') ?? '');
-  const dv = DELIV.includes(d.dv) ? d.dv : 'np';
+  const dvs = DELIV.filter(k => k !== 'drop' || isWholesale());
+  const dv = dvs.includes(d.dv) ? d.dv : 'np';
   const pay = d.pay || (isWholesale() ? 'inv' : 'cod');
-  $('#view').innerHTML = `<div class="wrap">${crumbs([['cart', t('cart')], ['', t('checkout')]])}<div class="ptitle"><h1>${t('checkout')}</h1></div>
-    <form class="co" id="cof" novalidate style="padding-bottom:40px">
-      <div class="card box">
-        <h2>${t('contactsH')}</h2>
-        <div class="two"><div class="fld" data-req><label for="o-first">${t('firstName')}<i>*</i></label><input id="o-first" autocomplete="given-name" value="${val('first')}"><span class="err" hidden>${t('req')}</span></div>
-          <div class="fld" data-req><label for="o-last">${t('lastName')}<i>*</i></label><input id="o-last" autocomplete="family-name" value="${val('last')}"><span class="err" hidden>${t('req')}</span></div></div>
-        <div class="two"><div class="fld" data-phone><label for="o-phone">${t('phone')}<i>*</i></label><input id="o-phone" type="tel" autocomplete="tel" placeholder="+380" value="${val('phone')}"><span class="err" hidden>${t('badPhone')}</span></div>
-          <div class="fld"><label for="o-email">E-mail</label><input id="o-email" type="email" autocomplete="email" value="${val('email')}"></div></div>
-        ${isWholesale() ? `<div class="fld"><label for="o-company">${t('companyName')}</label><input id="o-company" autocomplete="organization" value="${esc(d.company ?? (u.company || ''))}"></div>` : ''}
-        <hr><h2>${t('delivWay')}</h2>
-        ${S.tpls.length ? `<div class="fld"><label for="o-tpl">${t('useTpl')}</label><select id="o-tpl"><option value="">—</option>${S.tpls.map((x, i) => `<option value="${i}">${esc(x.name)}</option>`).join('')}</select></div>` : ''}
-        <div class="fld"><label for="o-dv">${t('chooseDeliv')}<i>*</i></label><select id="o-dv">${DELIV.filter(k => k !== 'drop' || isWholesale()).map(k => `<option value="${k}"${k === dv ? ' selected' : ''}>${esc(delivLabel(k))}</option>`).join('')}</select></div>
-        <div id="dvf"></div>
-        <hr><h2>${t('payWay')}</h2>
-        <div>${[['card', t('payCard'), 'wallet'], ['inv', t('payInvoice'), 'building'], ['cod', t('payCod'), 'truck']].map(([k, l, i]) => `<label class="radio-row"><input type="radio" name="pay" value="${k}"${k === pay ? ' checked' : ''}>${ic(i, 's')}<span>${esc(l)}</span></label>`).join('')}</div>
-        <hr><h2>${t('comment')}</h2><div class="fld"><label for="o-comment">${t('commentPh')}</label><textarea id="o-comment" rows="3">${val('comment')}</textarea></div>
-        <div style="display:flex;justify-content:flex-end"><button class="btn lg" type="submit">${t('placeOrder')}</button></div>
+  const f = (id, label, o = {}) => `<div class="fld"${o.req ? ' data-req' : ''}${o.phone ? ' data-phone' : ''}><label for="o-${id}">${label}${o.req || o.phone ? '<i>*</i>' : ''}</label><input id="o-${id}"${o.type ? ` type="${o.type}"` : ''}${o.ac ? ` autocomplete="${o.ac}"` : ''}${o.ph ? ` placeholder="${esc(o.ph)}"` : ''} value="${o.v ?? val(id)}"><span class="err" hidden>${o.phone ? t('badPhone') : t('req')}</span></div>`;
+  const shown = lines.slice(0, 4), more = lines.length - shown.length;
+  $('#view').innerHTML = `<section class="pg-sec"><div class="wrap">${crumbs([['cart', t('cart')], ['', t('checkout')]])}
+    <div class="pt"><h1>${t('checkout')}</h1>${!S.user ? `<span class="pt-note">${R('Вже купували в нас?', 'Уже покупали у нас?')} <a href="#login">${R('Увійти', 'Войти')}</a></span>` : ''}</div>
+    <form class="co2" id="cof" novalidate>
+      <div class="steps">
+        <section class="st"><h2><i>1</i>${t('contactsH')}</h2>
+          <div class="g2">${f('first', t('firstName'), { req: 1, ac: 'given-name' })}${f('last', t('lastName'), { req: 1, ac: 'family-name' })}
+          ${f('phone', t('phone'), { phone: 1, type: 'tel', ac: 'tel', ph: '+380 __ ___ __ __' })}${f('email', 'E-mail', { type: 'email', ac: 'email', ph: R('для чека і статусу замовлення', 'для чека и статуса заказа') })}
+          ${isWholesale() ? f('company', t('companyName'), { ac: 'organization', v: esc(d.company ?? (u.company || '')) }) : ''}</div></section>
+        <section class="st"><h2><i>2</i>${t('delivWay')}</h2>
+          ${S.tpls.length ? `<label class="tplsel">${ic('file', 's20')}<span>${t('useTpl')}</span><select id="o-tpl"><option value="">—</option>${S.tpls.map((x, i) => `<option value="${i}">${esc(x.name)}</option>`).join('')}</select></label>` : ''}
+          <div class="opts" role="radiogroup" aria-label="${t('delivWay')}">${dvs.map(k => { const [icn, brand, lt] = DV_META[k]; return `<label class="opt"><input type="radio" name="dv" value="${k}"${k === dv ? ' checked' : ''}><span class="oi ${lt ? 'lg ' + brand : ''}">${lt ? `<b>${lt}</b>` : ic(icn, 's20')}</span><span class="ot"><b>${esc(delivLabel(k))}</b><small>${dvNote(k)}</small></span></label>`; }).join('')}</div>
+          <div id="dvf"></div></section>
+        <section class="st"><h2><i>3</i>${t('payWay')}</h2>
+          <div class="opts">${[['cod', t('payCod'), 'wallet', R('готівкою або карткою у відділенні', 'наличными или картой в отделении')], ['card', t('payCard'), 'card', R('посилання на оплату надішле менеджер', 'ссылку на оплату пришлёт менеджер')], ['inv', t('payInvoice'), 'bank', R('рахунок для ФОП і компаній, з ПДВ', 'счёт для ФЛП и компаний, с НДС')]].map(([k, l, i, n]) => `<label class="opt"><input type="radio" name="pay" value="${k}"${k === pay ? ' checked' : ''}><span class="oi">${ic(i, 's20')}</span><span class="ot"><b>${esc(l)}</b><small>${n}</small></span></label>`).join('')}</div></section>
+        <section class="st"><h2><i>4</i>${t('comment')} <small>${R('необов’язково', 'необязательно')}</small></h2><div class="fld"><label class="sr" for="o-comment">${t('comment')}</label><textarea id="o-comment" rows="3" placeholder="${esc(R('Наприклад: зателефонуйте перед відправкою, потрібен рахунок на іншу фірму…', 'Например: позвоните перед отправкой, нужен счёт на другую фирму…'))}">${val('comment')}</textarea></div></section>
       </div>
-      <div style="display:grid;gap:16px;align-content:start;position:sticky;top:calc(env(safe-area-inset-top, 0px) + 88px)">
-        <div class="card box items"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h2>${t('goods')} <span class="muted">${lines.length}</span></h2><a class="link" href="#cart">${t('editGoods')} ${ic('chr', 'xs')}</a></div>
-          <div>${lines.map(l => `<div class="it"><span class="tph">${pimg(l.it)}</span><span>${esc(nm(l.it))}<small>${esc(l.it.cc || '')} · ${esc(whName(l.wh))}</small></span><span class="r">${l.q} ${t('pcs')}<br><b>${moneyTxt(priceOf(l.it) * l.q)}</b></span></div>`).join('')}</div></div>
-        <div class="total"><span>${cartQty()} ${plural(cartQty())} ${S.lang === 'ru' ? 'на сумму' : 'на суму'}</span><b>${moneyTxt(cartSum())}</b></div>
-      </div>
-    </form></div>`;
+      <aside class="sum2"><div class="sbox">
+        <div class="sh"><h2>${t('goods')} <span class="muted">${cartQty()}</span></h2><a class="dash" href="#cart">${t('editGoods')}</a></div>
+        <div class="mini">${shown.map(l => `<div class="mi"><span class="mph">${pimg(l.it)}<i>${l.q}</i></span><span class="mn">${esc(nm(l.it))}<small>${esc(l.it.cc || '')} · ${esc(whName(l.wh))}</small></span><b class="num">${moneyTxt(priceOf(l.it) * l.q)}</b></div>`).join('')}${more > 0 ? `<a class="dash" href="#cart">+ ${more} ${R('ще', 'ещё')}</a>` : ''}</div>
+        <dl class="rows"><div><dt>${R('Товари', 'Товары')}</dt><dd>${moneyTxt(cartSum())}</dd></div><div><dt>${R('Доставка', 'Доставка')}</dt><dd class="muted" id="sumDv">${dvNote(dv)}</dd></div></dl>
+        <div class="tot"><span>${R('До сплати', 'К оплате')}</span><b class="num">${moneyTxt(cartSum())}</b></div>
+        <button class="btn big" type="submit">${t('placeOrder')}</button>
+        <p class="hint">${R('Натискаючи кнопку, ви погоджуєтесь з', 'Нажимая кнопку, вы соглашаетесь с')} <a href="#oferta">${R('умовами оферти', 'условиями оферты')}</a>. ${R('Менеджер підтвердить замовлення телефоном або в месенджері.', 'Менеджер подтвердит заказ по телефону или в мессенджере.')}</p>
+      </div>${trustList()}</aside>
+      <div class="mbar"><div><small>${R('До сплати', 'К оплате')}</small><b class="num">${moneyTxt(cartSum())}</b></div><button class="btn" type="submit">${R('Підтвердити', 'Подтвердить')}</button></div>
+    </form></div></section>`;
+  const dvVal = () => ($('input[name=dv]:checked') || {}).value || 'np';
   const dvf = () => {
-    const k = $('#o-dv').value, f = $('#dvf');
-    const fld = (id, label, ph = '', req = true) => `<div class="fld"${req ? ' data-req' : ''}><label for="o-${id}">${label}${req ? '<i>*</i>' : ''}</label><input id="o-${id}" value="${esc(d[id] || '')}" placeholder="${esc(ph)}"><span class="err" hidden>${t('req')}</span></div>`;
-    if (k === 'np') f.innerHTML = `<div class="two">${fld('city', t('city'))}${fld('branch', t('branch'), S.lang === 'ru' ? 'Напр. отделение №12' : 'Напр. відділення №12')}</div>`;
-    else if (k === 'npc') f.innerHTML = `${fld('city', t('city'))}${fld('addr', t('address'), S.lang === 'ru' ? 'Улица, дом, квартира' : 'Вулиця, будинок, квартира')}`;
-    else if (k === 'del' || k === 'sat') f.innerHTML = `<div class="two">${fld('city', t('city'))}${fld('branch', S.lang === 'ru' ? 'Представительство' : 'Представництво')}</div>`;
-    else if (k === 'pk' || k === 'ph') f.innerHTML = `<p class="demo-note">${esc(k === 'pk' ? loc(CONFIG.kyiv) : loc(CONFIG.kharkiv))} · ${esc(loc(CONFIG.hoursShort))}</p>`;
-    else f.innerHTML = `<div class="two">${fld('rname', t('recipient'))}${fld('rphone', t('phone'), '+380')}</div><div class="two">${fld('city', t('city'))}${fld('branch', t('branch'))}</div>${fld('cod', t('dropCod'), '0', false)}`;
+    const k = dvVal(), box = $('#dvf');
+    const fld = (id, label, ph = '', req = true, ac = '') => `<div class="fld"${req ? ' data-req' : ''}><label for="o-${id}">${label}${req ? '<i>*</i>' : ''}</label><input id="o-${id}" value="${esc(d[id] || '')}" placeholder="${esc(ph)}"${ac ? ` autocomplete="${ac}"` : ''}><span class="err" hidden>${t('req')}</span></div>`;
+    const city = fld('city', t('city'), R('Наприклад, Київ', 'Например, Киев'), true, 'address-level2');
+    if (k === 'np') box.innerHTML = `<div class="g2">${city}${fld('branch', t('branch'), R('Номер відділення або поштомату', 'Номер отделения или почтомата'))}</div>`;
+    else if (k === 'npc') box.innerHTML = `<div class="g2">${city}${fld('addr', t('address'), R('Вулиця, будинок, квартира', 'Улица, дом, квартира'), true, 'street-address')}</div>`;
+    else if (k === 'del' || k === 'sat') box.innerHTML = `<div class="g2">${city}${fld('branch', R('Представництво', 'Представительство'), R('Адреса або номер', 'Адрес или номер'))}</div>`;
+    else if (k === 'pk' || k === 'ph') box.innerHTML = `<div class="pick">${ic('pin', 's20')}<div><b>${esc(k === 'pk' ? loc(CONFIG.kyiv) : loc(CONFIG.kharkiv))}</b><small>${esc(loc(CONFIG.hoursShort))} · ${R('зберігаємо замовлення 5 робочих днів', 'храним заказ 5 рабочих дней')}</small></div></div>`;
+    else box.innerHTML = `<p class="hint">${R('Відправимо від вашого імені, без наших документів і цін у посилці.', 'Отправим от вашего имени, без наших документов и цен в посылке.')}</p><div class="g2">${fld('rname', t('recipient'), '', true, 'name')}${fld('rphone', t('phone'), '+380', true)}${city}${fld('branch', t('branch'))}${fld('cod', t('dropCod'), '0', false)}</div>`;
+    const sd = $('#sumDv'); if (sd) sd.textContent = dvNote(k);
   };
-  dvf(); $('#o-dv').addEventListener('change', dvf);
-  const tp = $('#o-tpl'); if (tp) tp.addEventListener('change', () => { const x = S.tpls[+tp.value]; if (!x) return; $('#o-dv').value = x.dv; dvf(); ['city', 'branch', 'addr', 'rname', 'rphone'].forEach(k => { const el = $('#o-' + k); if (el && x[k]) el.value = x[k]; }); const pr = x.pay && $(`input[name=pay][value=${x.pay}]`); if (pr) pr.checked = true; keep(); });
-  const keep = () => { const o = { dv: $('#o-dv').value, pay: ($('input[name=pay]:checked') || {}).value }; ['first', 'last', 'phone', 'email', 'company', 'city', 'branch', 'addr', 'rname', 'rphone', 'cod', 'comment'].forEach(k => { const el = $('#o-' + k); if (el) o[k] = el.value; }); store.set('draft', o); return o; };
+  dvf(); $$('input[name=dv]').forEach(r => r.addEventListener('change', dvf));
+  const tp = $('#o-tpl'); if (tp) tp.addEventListener('change', () => { const x = S.tpls[+tp.value]; if (!x) return; const r = $(`input[name=dv][value=${x.dv}]`); if (r) r.checked = true; dvf(); ['city', 'branch', 'addr', 'rname', 'rphone'].forEach(k => { const el = $('#o-' + k); if (el && x[k]) el.value = x[k]; }); const pr = x.pay && $(`input[name=pay][value=${x.pay}]`); if (pr) pr.checked = true; keep(); });
+  const keep = () => { const o = { dv: dvVal(), pay: ($('input[name=pay]:checked') || {}).value }; ['first', 'last', 'phone', 'email', 'company', 'city', 'branch', 'addr', 'rname', 'rphone', 'cod', 'comment'].forEach(k => { const el = $('#o-' + k); if (el) o[k] = el.value; }); store.set('draft', o); return o; };
   $('#cof').addEventListener('input', keep); $('#cof').addEventListener('change', keep);
+  $('#cof').addEventListener('focusout', e => { const fl = e.target.closest('.fld.bad'); if (fl && e.target.value.trim()) { fl.classList.remove('bad'); $('.err', fl).hidden = true; } });
   $('#cof').addEventListener('submit', e => {
     e.preventDefault(); const o = keep(); let first = null;
     $$('#cof [data-req]').forEach(f => { const inp = $('input,select,textarea', f); const bad = !inp.value.trim(); f.classList.toggle('bad', bad); $('.err', f).hidden = !bad; if (bad && !first) first = inp; });
     $$('#cof [data-phone]').forEach(f => { const inp = $('input', f); const dg = inp.value.replace(/\D/g, ''); const bad = dg.length < 10 || dg.length > 12; f.classList.toggle('bad', bad); $('.err', f).hidden = !bad; if (bad && !first) first = inp; });
-    if (first) { first.focus(); first.scrollIntoView({ block: 'center' }); return; }
+    if (first) { first.focus({ preventScroll: true }); first.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
     placeOrder(o);
   });
 }
 function placeOrder(o) {
   if (API.on) {
-    const payload = { lang: S.lang, contact: { first: o.first, last: o.last, phone: o.phone, email: o.email, company: o.company }, delivery: { dv: o.dv, label: delivLabel(o.dv), city: o.city, branch: o.branch, addr: o.addr, rname: o.rname, rphone: o.rphone, cod: o.cod }, pay: o.pay, comment: o.comment, items: S.cart.map(l => ({ id: l.id, q: l.q, wh: l.w })) };
-    const btn = $('#cof [type=submit]'); if (btn) btn.disabled = true;
+    const payload = { lang: S.lang, contact: { first: o.first, last: o.last, phone: o.phone, email: o.email, company: o.company }, delivery: { dv: o.dv, label: delivLabel(o.dv), city: o.city, branch: o.branch, addr: o.addr, rname: o.rname, rphone: o.rphone, cod: o.cod }, pay: o.pay, comment: o.comment, items: S.cart.map(l => ({ id: l.id, q: l.q, wh: l.wh })) };
+    const btns = $$('#cof [type=submit]'); btns.forEach(b => { b.disabled = true; });
     API.req('order', payload).then(async j => { S.cart = []; store.set('draft', { first: o.first, last: o.last, phone: o.phone, email: o.email, company: o.company, dv: o.dv, city: o.city, branch: o.branch }); if (S.user) await API.syncOrders(); saveAll(); updateBadges(); S.done = { no: j.no, text: j.text, srv: 1 }; location.hash = 'order-done'; })
-      .catch(e => { if (btn) btn.disabled = false; toast(e.message === 'network' ? R('Немає зв’язку із сервером. Замовлення не надіслано — спробуйте ще раз або зателефонуйте нам.', 'Нет связи с сервером. Заказ не отправлен — попробуйте ещё раз или позвоните нам.') : e.message); });
+      .catch(e => { btns.forEach(b => { b.disabled = false; }); toast(e.message === 'network' ? R('Немає зв’язку із сервером. Замовлення не надіслано — спробуйте ще раз або зателефонуйте нам.', 'Нет связи с сервером. Заказ не отправлен — попробуйте ещё раз или позвоните нам.') : e.message); });
     return;
   }
   const lines = cartLines(); const dt = new Date();
@@ -2341,7 +2610,11 @@ function viewAuth(mode) {
       <label class="chk consent" data-consent><input type="checkbox" id="a-ok"><span>${R('Мною прочитані, і я погоджуюсь з документом', 'Мною прочитаны, и я соглашаюсь с документом')} <a class="link under" href="#oferta">${R('Політика конфіденційності та використання файлів cookie', 'Политика конфиденциальности и использования файлов cookie')}</a></span></label>
       <div class="arow"><a class="link" href="#login">${t('haveAcc')} ${t('login')}</a><button class="btn" type="submit">${R('Зареєструватися', 'Зарегистрироваться')}</button></div>`;
   $('#view').innerHTML = `<div class="wrap">${crumbs([['account', t('cabinet')], ['', reg ? t('regT') : R('Авторизація', 'Авторизация')]])}
-    <form class="card auth${reg ? ' reg' : ''}" id="af" novalidate>${body}${reg ? '<span class="err" id="a-err" hidden></span>' : ''}<p class="demo-note"${API.on ? ' hidden' : ''}>${R('Прототип: акаунт зберігається лише у вашому браузері, пароль не перевіряється й не зберігається. У робочій версії вхід і оптові ціни працюватимуть через сервер сайту та 1С.', 'Прототип: аккаунт хранится только в вашем браузере, пароль не проверяется и не сохраняется. В рабочей версии вход и оптовые цены будут работать через сервер сайта и 1С.')}</p></form></div>`;
+    <div class="authw"><form class="card auth${reg ? ' reg' : ''}" id="af" novalidate>${body}${reg ? '<span class="err" id="a-err" hidden></span>' : ''}<p class="demo-note"${API.on ? ' hidden' : ''}>${R('Прототип: акаунт зберігається лише у вашому браузері, пароль не перевіряється й не зберігається. У робочій версії вхід і оптові ціни працюватимуть через сервер сайту та 1С.', 'Прототип: аккаунт хранится только в вашем браузере, пароль не проверяется и не сохраняется. В рабочей версии вход и оптовые цены будут работать через сервер сайта и 1С.')}</p></form>
+    <aside class="b2bp"><span class="eb">${R('Для бізнесу', 'Для бизнеса')}</span><h2>${R('Оптовий кабінет PLATANIK', 'Оптовый кабинет PLATANIK')}</h2>
+      <ul>${[['coins', R('Персональні оптові ціни одразу в каталозі', 'Персональные оптовые цены сразу в каталоге')], ['truck', R('Залишки по складах Київ і Харків у реальному часі', 'Остатки по складам Киев и Харьков в реальном времени')], ['swap', R('Дропшипінг: відправка від імені вашого магазину', 'Дропшиппинг: отправка от имени вашего магазина')], ['file', R('Історія замовлень, накладні та шаблони доставки', 'История заказов, накладные и шаблоны доставки')]].map(([i, x]) => `<li>${ic(i, 's20')}<span>${x}</span></li>`).join('')}</ul>
+      <p>${R('Зареєструйтеся як ФОП або юрособа — менеджер підтвердить доступ протягом робочого дня.', 'Зарегистрируйтесь как ФЛП или юрлицо — менеджер подтвердит доступ в течение рабочего дня.')}</p>
+      <a class="tel" href="tel:${CONFIG.phoneTel}">${ic('call', 's20')}${esc(CONFIG.phone)}</a></aside></div></div>`;
   const ty = $('#a-type'); if (ty) ty.addEventListener('change', () => { S._regType = ty.value; viewAuth('register'); });
   const fg = $('#forgot'); if (fg) fg.addEventListener('click', () => toast(R('Напишіть менеджеру — допоможемо відновити доступ', 'Напишите менеджеру — поможем восстановить доступ')));
   const dm = $('#demoOpt'); if (dm) dm.addEventListener('click', () => loginAs({ type: 'ur', demo: 1, disc: 0.1, company: R('Демо-клієнт ТОВ', 'Демо-клиент ООО'), rep: R('Демо Представник', 'Демо Представитель'), first: R('Демо', 'Демо'), phone: '+380000000000', email: 'demo@example.com', edrpou: '' }));
@@ -2593,6 +2866,9 @@ function route() {
   else viewNotFound();
   if (S.routeKey !== h) window.scrollTo(0, 0);
   S.routeKey = h;
+  const pg = h.split('-')[0].replace(/^[cpb]\d.*$|^b$/, x => x[0]);
+  document.body.dataset.page = /^c\d+$/.test(h) ? 'c' : /^p\d+$/.test(h) ? 'p' : pg;
+  $$('.tabbar a').forEach(a => a.classList.toggle('on', a.dataset.tab === document.body.dataset.page || (a.dataset.tab === 'catalog' && document.body.dataset.page === 'c')));
   $('#view').focus({ preventScroll: true });
 }
 
@@ -2685,6 +2961,12 @@ function openMobileMenu() {
     $('#view').innerHTML = `<div class="wrap" style="padding-block:40px"><div class="empty"><b>${t('loadingErr')}</b><p class="num">${esc(CONFIG.phone)}</p></div></div>`;
   }
 })();
+
+/* ===== mobile helpers: tab bar search, sticky buy bar on product page ===== */
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-focus-search]'); if (!a) return;
+  e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); const q = $('#q'); if (q) setTimeout(() => q.focus(), 150);
+});
 
 </script>
 
