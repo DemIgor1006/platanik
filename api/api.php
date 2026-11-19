@@ -18,6 +18,7 @@ $CFG = [
     'notify_email'     => '',            // e-mail для копії замовлення
     'keycrm_token'     => '',            // API-ключ KeyCRM; порожній = не надсилати
     'keycrm_source_id' => 0,             // ID джерела замовлень у KeyCRM
+    'np_key'           => '',            // API-ключ Нової Пошти: довідник міст/відділень у checkout (ключ лишається на сервері)
     'default_opt_discount' => 0,         // знижка % для нового оптового клієнта після підтвердження
     'storage'          => __DIR__ . '/storage',
     'catalog'          => __DIR__ . '/../data/catalog.json',
@@ -292,6 +293,21 @@ case 'lead': {
     $title = ['oneclick' => 'Купити в один клік', 'notify' => 'Повідомити про надходження', 'callback' => 'Передзвонити', 'question' => 'Питання з сайту'][$kind];
     notify($title . "\n" . str($b['name'] ?? '') . ' ' . $phone . ($it ? "\n" . (($it['cc'] ?? '') ? $it['cc'] . ' · ' : '') . $it['n'] . ' — ' . $it['p'] . ' грн' : '') . (str($b['text'] ?? '') !== '' ? "\n" . str($b['text'], 1000) : ''));
     out(['ok' => true]);
+}
+
+case 'np': {
+    // Nova Poshta directory proxy: only two read-only directory calls, the company key never reaches the browser
+    $b = body(); throttle('np', 300, 3600);
+    $m = $b['m'] ?? '';
+    if ($m === 'cities') { $req = ['modelName' => 'Address', 'calledMethod' => 'searchSettlements', 'methodProperties' => ['CityName' => str($b['q'] ?? '', 60), 'Limit' => '20', 'Page' => '1']]; }
+    elseif ($m === 'whs') { $ref = preg_replace('/[^a-f0-9-]/i', '', (string) ($b['city'] ?? '')); if ($ref === '') fail('city', 'city'); $req = ['modelName' => 'Address', 'calledMethod' => 'getWarehouses', 'methodProperties' => ['CityRef' => $ref, 'FindByString' => str($b['q'] ?? '', 60), 'Limit' => '60', 'Page' => '1']]; }
+    else fail('m', 'unknown');
+    $req['apiKey'] = (string) ($CFG['np_key'] ?? '');
+    $ctx = stream_context_create(['http' => ['method' => 'POST', 'header' => "Content-Type: application/json\r\n", 'content' => json_encode($req, JSON_UNESCAPED_UNICODE), 'timeout' => 8]]);
+    $raw = @file_get_contents('https://api.novaposhta.ua/v2.0/json/', false, $ctx);
+    $j = $raw ? json_decode($raw, true) : null;
+    if (!$j || empty($j['success'])) fail('np', 'Нова Пошта не відповідає.');
+    out(['ok' => true, 'data' => $j['data']]);
 }
 
 case 'reviews': {
